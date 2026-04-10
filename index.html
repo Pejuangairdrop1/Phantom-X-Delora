@@ -9,7 +9,7 @@
 body {
   margin: 0;
   font-family: Arial;
-  background: linear-gradient(135deg, #0f172a, #020617);
+  background: #0b0f1a;
   color: white;
   display: flex;
   justify-content: center;
@@ -18,29 +18,39 @@ body {
 }
 
 .app {
-  background: rgba(255,255,255,0.05);
+  background: #111827;
   padding: 20px;
   border-radius: 20px;
-  width: 330px;
-  text-align: center;
+  width: 360px;
 }
 
-button, select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
+.box {
+  background: #1f2937;
+  padding: 12px;
+  border-radius: 12px;
   margin-top: 10px;
 }
 
-button {
-  background: #6366f1;
+input, select {
+  width: 100%;
+  background: transparent;
+  border: none;
   color: white;
-  cursor: pointer;
 }
 
-button:hover {
-  background: #4f46e5;
+button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: #6366f1;
+  color: white;
+  margin-top: 10px;
+}
+
+.small {
+  font-size: 12px;
+  opacity: 0.7;
 }
 </style>
 </head>
@@ -52,89 +62,142 @@ button:hover {
 
   <button onclick="connectWallet()">Connect Wallet</button>
 
-  <select id="network" onchange="switchNetwork()">
-    <option value="0x1">Ethereum</option>
-    <option value="0x38">BSC</option>
-  </select>
+  <div class="box">
+    <input id="amount" placeholder="Amount">
+  </div>
 
-  <p id="wallet">Not connected</p>
-  <p id="balance">Balance: -</p>
+  <div class="box">
+    <select id="fromToken"></select>
+  </div>
+
+  <div class="box">
+    <select id="toToken"></select>
+  </div>
+
+  <div class="box">
+    Slippage:
+    <input id="slippage" value="0.5"> %
+  </div>
+
+  <button onclick="getQuote()">Get Price</button>
+
+  <p id="price">Price: -</p>
+  <p id="route" class="small">Route: -</p>
+  <p id="gas" class="small">Gas: -</p>
+
+  <button onclick="swap()">Swap</button>
 </div>
 
 <script>
 let provider;
 let userAddress = "";
+let txData = null;
 
-// ⚠️ WARNING HP
-if (!window.ethereum && !window.okxwallet) {
-  alert("Open this dApp in MetaMask / OKX / Brave Wallet browser");
+// 🔗 TOKEN LIST (REAL)
+const tokens = [
+  { symbol: "ETH", address: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" },
+  { symbol: "USDT", address: "0xdAC17F958D2ee523a2206206994597C13D831ec7" },
+  { symbol: "USDC", address: "0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" }
+];
+
+// load token dropdown
+function loadTokens() {
+  const from = document.getElementById("fromToken");
+  const to = document.getElementById("toToken");
+
+  tokens.forEach(t => {
+    let opt1 = document.createElement("option");
+    opt1.value = t.address;
+    opt1.innerText = t.symbol;
+
+    let opt2 = document.createElement("option");
+    opt2.value = t.address;
+    opt2.innerText = t.symbol;
+
+    from.appendChild(opt1);
+    to.appendChild(opt2);
+  });
 }
 
-// 🔥 CONNECT WALLET (AUTO DETECT)
-async function connectWallet() {
-  try {
-    if (window.okxwallet) {
-      provider = window.okxwallet;
-      console.log("OKX Wallet");
-    } else if (window.ethereum && window.ethereum.isRabby) {
-      provider = window.ethereum;
-      console.log("Rabby Wallet");
-    } else if (window.ethereum) {
-      provider = window.ethereum;
-      console.log("MetaMask / Brave");
-    } else {
-      alert("No wallet detected");
-      return;
-    }
+loadTokens();
 
-    const accounts = await provider.request({
+// 🔥 CONNECT WALLET
+async function connectWallet() {
+  if (window.ethereum) {
+    provider = window.ethereum;
+
+    const acc = await provider.request({
       method: "eth_requestAccounts"
     });
 
-    userAddress = accounts[0];
-
-    document.getElementById("wallet").innerText =
-      "Connected: " + userAddress;
-
-    getBalance();
-
-  } catch (err) {
-    alert("Connection failed");
+    userAddress = acc[0];
+    alert("Connected: " + userAddress);
+  } else {
+    alert("Install wallet");
   }
 }
 
-// 💰 GET BALANCE
-async function getBalance() {
+// 💰 GET QUOTE
+async function getQuote() {
+  const amount = document.getElementById("amount").value;
+  const fromToken = document.getElementById("fromToken").value;
+  const toToken = document.getElementById("toToken").value;
+  const slippage = document.getElementById("slippage").value;
+
+  document.getElementById("price").innerText = "Loading...";
+  document.getElementById("route").innerText = "...";
+
   try {
-    const balance = await provider.request({
-      method: "eth_getBalance",
-      params: [userAddress, "latest"]
+    const res = await fetch("https://api.delora.xyz/v1/quote", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "YOUR_API_KEY"
+      },
+      body: JSON.stringify({
+        fromToken,
+        toToken,
+        amount,
+        slippage,
+        user: userAddress
+      })
     });
 
-    const eth = parseInt(balance, 16) / 1e18;
+    const data = await res.json();
 
-    document.getElementById("balance").innerText =
-      "Balance: " + eth.toFixed(4);
+    txData = data.tx;
+
+    document.getElementById("price").innerText =
+      "Receive: " + data.toAmount;
+
+    document.getElementById("route").innerText =
+      "Route: " + data.route;
+
+    document.getElementById("gas").innerText =
+      "Gas: " + data.gas;
 
   } catch (err) {
-    console.error(err);
+    document.getElementById("price").innerText =
+      "API belum aktif";
   }
 }
 
-// 🔄 SWITCH NETWORK
-async function switchNetwork() {
-  const chainId = document.getElementById("network").value;
+// ⚡ SWAP
+async function swap() {
+  if (!txData) {
+    alert("Get price dulu");
+    return;
+  }
 
   try {
-    await provider.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId }]
+    const tx = await provider.request({
+      method: "eth_sendTransaction",
+      params: [txData]
     });
 
-    getBalance();
-
+    alert("TX: " + tx);
   } catch (err) {
-    alert("Switch network gagal, ganti manual di wallet");
+    alert("Swap gagal");
   }
 }
 </script>
