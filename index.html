@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Phantom X Delora</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app {
+  background: rgba(255,255,255,0.05);
+  padding: 20px;
+  border-radius: 20px;
+  width: 330px;
+  text-align: center;
+}
+
+button, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  margin-top: 10px;
+}
+
+button {
+  background: #6366f1;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #4f46e5;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h2>⚡ Phantom X Delora</h2>
+
+  <button onclick="connectWallet()">Connect Wallet</button>
+
+  <select id="network" onchange="switchNetwork()">
+    <option value="0x1">Ethereum</option>
+    <option value="0x38">BSC</option>
+  </select>
+
+  <p id="wallet">Not connected</p>
+  <p id="balance">Balance: -</p>
+</div>
+
+<script>
+let provider;
+let userAddress = "";
+
+// ⚠️ WARNING HP
+if (!window.ethereum && !window.okxwallet) {
+  alert("Open this dApp in MetaMask / OKX / Brave Wallet browser");
+}
+
+// 🔥 CONNECT WALLET (AUTO DETECT)
+async function connectWallet() {
+  try {
+    if (window.okxwallet) {
+      provider = window.okxwallet;
+      console.log("OKX Wallet");
+    } else if (window.ethereum && window.ethereum.isRabby) {
+      provider = window.ethereum;
+      console.log("Rabby Wallet");
+    } else if (window.ethereum) {
+      provider = window.ethereum;
+      console.log("MetaMask / Brave");
+    } else {
+      alert("No wallet detected");
+      return;
+    }
+
+    const accounts = await provider.request({
+      method: "eth_requestAccounts"
+    });
+
+    userAddress = accounts[0];
+
+    document.getElementById("wallet").innerText =
+      "Connected: " + userAddress;
+
+    getBalance();
+
+  } catch (err) {
+    alert("Connection failed");
+  }
+}
+
+// 💰 GET BALANCE
+async function getBalance() {
+  try {
+    const balance = await provider.request({
+      method: "eth_getBalance",
+      params: [userAddress, "latest"]
+    });
+
+    const eth = parseInt(balance, 16) / 1e18;
+
+    document.getElementById("balance").innerText =
+      "Balance: " + eth.toFixed(4);
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// 🔄 SWITCH NETWORK
+async function switchNetwork() {
+  const chainId = document.getElementById("network").value;
+
+  try {
+    await provider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId }]
+    });
+
+    getBalance();
+
+  } catch (err) {
+    alert("Switch network gagal, ganti manual di wallet");
+  }
+}
+</script>
+
+</body>
+</html>
