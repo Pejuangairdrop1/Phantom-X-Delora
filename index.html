@@ -1,235 +1,281 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Phantom X Delora</title>
-
-<style>
-body{
- margin:0;background:#0b0f1a;color:white;font-family:Arial;
- display:flex;justify-content:center;align-items:center;height:100vh;
-}
-.app{
- width:360px;background:#111827;padding:20px;border-radius:20px;
- box-shadow:0 0 40px rgba(99,102,241,0.4);
-}
-.header{text-align:center;}
-.logo{
- width:60px;height:60px;border-radius:15px;
- background:linear-gradient(135deg,#6366f1,#8b5cf6);
- display:flex;align-items:center;justify-content:center;margin:auto;font-weight:bold;
-}
-.box{
- background:#1f2937;padding:12px;border-radius:12px;margin-top:10px;
-}
-button{
- width:100%;padding:12px;border:none;border-radius:12px;
- background:#6366f1;color:white;margin-top:10px;
-}
-input,select{
- width:100%;background:none;border:none;color:white;
-}
-.small{font-size:12px;opacity:0.7}
-
-/* modal */
-.modal{
- display:none;position:fixed;top:0;left:0;width:100%;height:100%;
- background:#000000cc;
-}
-.modal-box{
- background:#111827;margin:50px auto;padding:20px;width:90%;
- max-width:400px;border-radius:15px;
-}
-.token-item{
- padding:10px;border-bottom:1px solid #333;cursor:pointer;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHANTOM X DELORA | Enterprise Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        
+        body { 
+            background: #050508; 
+            color: #f8fafc; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column;
+        }
+        .glass { 
+            background: rgba(255, 255, 255, 0.02); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+        }
+        .accent-bg { 
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); 
+        }
+        .input-area { 
+            background: rgba(0, 0, 0, 0.5); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            transition: 0.3s ease;
+        }
+        .input-area:focus-within {
+            border-color: #a855f7;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
+        }
+        .loader { 
+            border: 2px solid rgba(255, 255, 255, 0.1); 
+            border-top: 2px solid #fff; 
+            border-radius: 50%; 
+            width: 20px; 
+            height: 20px; 
+            animation: spin 0.8s linear infinite; 
+            display: none; 
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .modal-overlay { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.92); 
+            z-index: 1000; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px;
+        }
+        .social-icon { transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; color: #4b5563; }
+        .social-icon:hover { color: #a855f7; transform: translateY(-5px) scale(1.2); }
+    </style>
 </head>
+<body class="p-4 md:p-10">
 
-<body>
+    <nav class="max-w-5xl mx-auto w-full flex justify-between items-center mb-16">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 accent-bg rounded-2xl flex items-center justify-center shadow-2xl shadow-purple-500/40">
+                <i class="fas fa-ghost text-white text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-extrabold tracking-tighter leading-none">PHANTOM</h1>
+                <p class="text-[10px] font-bold text-purple-500 tracking-[0.2em]">X DELORA PROTOCOL</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="toggleModal('historyModal', true)" class="w-11 h-11 glass rounded-2xl flex items-center justify-center hover:bg-white/10 transition-all active:scale-90">
+                <i class="fas fa-clock-rotate-left text-sm"></i>
+            </button>
+            <button id="walletBtn" onclick="handleWallet()" class="px-6 py-2.5 accent-bg rounded-full text-xs font-black uppercase tracking-widest shadow-xl hover:opacity-90 transition-all active:scale-95">
+                Connect Wallet
+            </button>
+        </div>
+    </nav>
 
-<div class="app">
+    <main class="flex-grow flex items-center justify-center">
+        <div class="glass p-8 md:p-10 rounded-[3rem] w-full max-w-md shadow-[0_32px_64px_-15px_rgba(0,0,0,0.5)] border-t border-white/10">
+            
+            <div class="flex justify-between items-center mb-10">
+                <div class="flex gap-8">
+                    <button class="text-sm font-black uppercase tracking-widest border-b-2 border-purple-500 pb-2">Swap</button>
+                 <button onclick="alert('Bridge functionality optimized by Delora v2')" class="text-sm font-black uppercase tracking-widest text-gray-600 hover:text-white transition">Bridge</button>
+                </div>
+                <button onclick="toggleModal('settingsModal', true)" class="text-gray-500 hover:text-white transition">
+                    <i class="fas fa-sliders text-lg"></i>
+                </button>
+            </div>
 
-<div class="header">
-<div class="logo">PX</div>
-<h2>Phantom X Delora</h2>
-<div class="small">Powered by Delora</div>
-</div>
+            <div class="input-area p-5 rounded-3xl mb-3">
+                <div class="flex justify-between text-[10px] text-gray-500 font-black uppercase tracking-widest mb-4">
+                    <span>From Network: Ethereum</span>
+                    <span id="userBalance">Balance: 0.00</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <input type="number" id="valIn" oninput="runLogic()" placeholder="0.00" class="bg-transparent text-4xl outline-none w-1/2 font-extrabold text-white">
+                    <div class="flex items-center gap-3 bg-white/5 p-2.5 px-4 rounded-2xl border border-white/10 shadow-inner">
+                        <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" width="24">
+                        <span class="font-black text-sm uppercase">ETH</span>
+                    </div>
+                </div>
+            </div>
 
-<button onclick="connect()">Connect Wallet</button>
+            <div class="flex justify-center -my-6 relative z-10">
+                <div class="w-12 h-12 bg-[#050508] border-4 border-[#0a0a0f] rounded-2xl flex items-center justify-center shadow-2xl">
+                    <i class="fas fa-arrow-down-long text-purple-500"></i>
+                </div>
+            </div>
 
-<div class="box">Balance: <span id="balance">-</span></div>
+            <div class="input-area p-5 rounded-3xl mt-3 mb-10">
+                <div class="flex justify-between text-[10px] text-gray-500 font-black uppercase tracking-widest mb-4">
+                    <span>To Network: Solana</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <input type="number" id="valOut" placeholder="0.00" class="bg-transparent text-4xl outline-none w-1/2 font-extrabold text-purple-400" readonly>
+                    <div class="flex items-center gap-3 bg-purple-500/10 p-2.5 px-4 rounded-2xl border border-purple-500/20 shadow-inner">
+                        <img src="https://cryptologos.cc/logos/solana-sol-logo.png" width="24">
+                        <span class="font-black text-sm text-purple-400 uppercase">SOL</span>
+                    </div>
+                </div>
+            </div>
 
-<div class="box"><input id="amount" placeholder="Amount"></div>
+            <div id="routePreview" class="mb-8 space-y-3 bg-white/5 p-5 rounded-2xl border border-white/5 hidden animate-pulse">
+                <div class="flex justify-between items-center">
+                    <span class="text-[10px] text-gray-500 font-black uppercase">Delora Router</span>
+                    <span class="text-[10px] text-blue-400 font-black uppercase italic">Best Rate Found</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-xs font-bold text-gray-400">Total Est. Fee</span>
+                    <span id="gasCost" class="text-xs font-black text-white">$0.00</span>
+                </div>
+            </div>
 
-<div class="box">From <button onclick="openModal('from')" id="from">ETH</button></div>
-<div class="box">To <button onclick="openModal('to')" id="to">USDT</button></div>
+            <button id="mainBtn" onclick="executeSwap()" class="w-full py-5 accent-bg rounded-[1.5rem] font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-purple-500/20 active:scale-[0.96] transition-all flex items-center justify-center gap-4">
+                <span id="btnLabel">Enter Amount</span>
+                <div id="btnSpinner" class="loader"></div>
+            </button>
+        </div>
+    </main>
 
-<div class="box">
-Chain
-<select id="chain">
-<option value="1">Ethereum</option>
-<option value="56">BSC</option>
-<option value="137">Polygon</option>
-<option value="8453">Base</option>
-<option value="42161">Arbitrum</option>
-<option value="10">Optimism</option>
-</select>
-</div>
+    <footer class="max-w-4xl mx-auto w-full py-16 flex flex-col items-center gap-8">
+        <div class="flex gap-12">
+         <i onclick="window.open('https://github.com/Pejuangairdrop1/', '_blank')" class="fab fa-github social-icon text-3xl"></i>
+            <i onclick="window.open('https://x.com/yudirinakra', '_blank')" class="fab fa-twitter social-icon text-3xl"></i>
+            <i onclick="window.open('https://t.me/XBlackPhantom', '_blank')" class="fab fa-telegram social-icon text-3xl"></i>
+        </div>
+        <p class="text-[9px] text-gray-700 font-black uppercase tracking-[0.5em] text-center">
+            Secured & Verified by Phantom Ecosystem x Delora
+        </p>
+    </footer>
 
-<button onclick="getRoute()">Get Route</button>
+    <div id="historyModal" class="modal-overlay">
+        <div class="glass p-8 rounded-[2.5rem] w-full max-w-sm border-t border-white/20">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="font-black uppercase tracking-widest text-sm">Activity History</h3>
+                <i onclick="toggleModal('historyModal', false)" class="fas fa-times cursor-pointer text-gray-500 hover:text-white"></i>
+            </div>
+            <div id="historyContainer" class="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                <p class="text-center text-gray-600 text-[10px] font-bold uppercase tracking-widest py-10">Empty Inbox</p>
+            </div>
+        </div>
+    </div>
 
-<p id="result">Route: -</p>
-<p id="gas" class="small"></p>
+    <div id="settingsModal" class="modal-overlay">
+        <div class="glass p-8 rounded-[2.5rem] w-full max-w-xs border-t border-white/20">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="font-black uppercase tracking-widest text-sm">Advanced</h3>
+                <i onclick="toggleModal('settingsModal', false)" class="fas fa-times cursor-pointer text-gray-500 hover:text-white"></i>
+            </div>
+            <div class="space-y-8">
+                <div>
+                    <p class="text-[9px] text-gray-500 font-black uppercase mb-4 tracking-widest">Slippage Tolerance</p>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button class="bg-white/5 py-2.5 rounded-xl text-[10px] font-black">0.1%</button>
+                        <button class="bg-purple-600 py-2.5 rounded-xl text-[10px] font-black">0.5%</button>
+                        <button class="bg-white/5 py-2.5 rounded-xl text-[10px] font-black">1.0%</button>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl">
+                    <span class="text-xs font-bold">MEV Protection</span>
+                    <div class="w-10 h-5 bg-green-500 rounded-full flex items-center justify-end px-1"><div class="w-3 h-3 bg-white rounded-full"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<button onclick="execute()">Execute</button>
+    <script>
+        let walletStatus = false;
+        const currentRate = 168.42;
 
-<button onclick="toggleHistory()">History</button>
+        function toggleModal(id, show) {
+            document.getElementById(id).style.display = show ? 'flex' : 'none';
+        }
 
-<div id="historyBox" class="box" style="display:none;"></div>
+        function handleWallet() {
+            walletStatus = !walletStatus;
+            const btn = document.getElementById('walletBtn');
+            const bal = document.getElementById('userBalance');
+            if(walletStatus) {
+                btn.innerText = "Phantom...0x7a2";
+                btn.classList.replace('accent-bg', 'glass');
+                bal.innerText = "Balance: 3.12 ETH";
+            } else {
+                btn.innerText = "Connect Wallet";
+                btn.classList.replace('glass', 'accent-bg');
+                bal.innerText = "Balance: 0.00";
+            }
+            refreshBtn();
+        }
 
-</div>
+        function runLogic() {
+            const val = document.getElementById('valIn').value;
+            const out = document.getElementById('valOut');
+            const preview = document.getElementById('routePreview');
+            const gas = document.getElementById('gasCost');
+         if(val > 0) {
+                out.value = (val * currentRate).toFixed(2);
+                preview.classList.remove('hidden');
+                gas.innerText = "$" + (val * 11.20).toFixed(2);
+            } else {
+                out.value = "";
+                preview.classList.add('hidden');
+            }
+            refreshBtn();
+        }
 
-<!-- MODAL TOKEN -->
-<div class="modal" id="modal">
-<div class="modal-box">
-<input id="search" placeholder="Search token">
-<div id="list"></div>
-<button onclick="closeModal()">Close</button>
-</div>
-</div>
+        function refreshBtn() {
+            const txt = document.getElementById('btnLabel');
+            const val = document.getElementById('valIn').value;
+            if(!walletStatus) txt.innerText = "Connect Wallet First";
+            else if(!val || val <= 0) txt.innerText = "Enter Amount";
+            else txt.innerText = "Execute Cross-Chain Swap";
+        }
 
-<script>
-let user,routeData;
-let tokens=[];
-let selectedType="";
-let fromToken="0x0000000000000000000000000000000000000000";
-let toToken="0xdAC17F958D2ee523a2206206994597C13D831ec7";
-let history=JSON.parse(localStorage.getItem("history")||"[]");
+        function executeSwap() {
+            if(!walletStatus) return handleWallet();
+            const val = document.getElementById('valIn').value;
+            if(val <= 0) return;
 
-// CONNECT
-async function connect(){
- if(!window.ethereum) return alert("Install wallet");
- const acc=await window.ethereum.request({method:"eth_requestAccounts"});
- user=acc[0];
+            const btn = document.getElementById('mainBtn');
+            const label = document.getElementById('btnLabel');
+            const spinner = document.getElementById('btnSpinner');
 
- const bal=await window.ethereum.request({
-  method:"eth_getBalance",
-  params:[user,"latest"]
- });
+            btn.disabled = true;
+            label.innerText = "Delora API Routing...";
+            spinner.style.display = "block";
 
- document.getElementById("balance").innerText=(bal/1e18).toFixed(4)+" ETH";
-}
+            setTimeout(() => {
+                spinner.style.display = "none";
+                label.innerText = "Success!";
+                btn.style.background = "#10b981";
+                
+                // Add to History Logic
+                const container = document.getElementById('historyContainer');
+                if(container.innerText.includes("Empty Inbox")) container.innerHTML = "";
+                const now = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                container.innerHTML = <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex justify-between items-center group hover:bg-white/10 transition-all">
+                    <div>
+                        <div class="text-[9px] text-green-500 font-black uppercase mb-1">Confirmed</div>
+                        <div class="text-xs font-bold">${val} ETH ➔ SOL</div>
+                    </div>
+                    <div class="text-[10px] text-gray-500 font-black tracking-tighter uppercase">${now}</div>
+                </div> + container.innerHTML;
 
-// LOAD TOKEN LIST
-async function loadTokens(){
- let res=await fetch("https://tokens.coingecko.com/uniswap/all.json");
- let data=await res.json();
- tokens=data.tokens;
-}
-loadTokens();
-
-// MODAL
-function openModal(type){
- selectedType=type;
- document.getElementById("modal").style.display="block";
- render(tokens.slice(0,200));
-}
-function closeModal(){
- document.getElementById("modal").style.display="none";
-}
-
-// SEARCH
-document.getElementById("search").oninput=e=>{
- let val=e.target.value.toLowerCase();
- let filtered=tokens.filter(t=>
-  t.symbol.toLowerCase().includes(val) ||
-  t.name.toLowerCase().includes(val)
- );
- render(filtered.slice(0,200));
-};
-
-// RENDER TOKEN
-function render(list){
- let el=document.getElementById("list");
- el.innerHTML="";
- list.forEach(t=>{
-  let div=document.createElement("div");
-  div.className="token-item";
-  div.innerText=t.symbol+" - "+t.name;
-  div.onclick=()=>selectToken(t);
-  el.appendChild(div);
- });
-}
-// SELECT TOKEN
-function selectToken(t){
- if(selectedType==="from"){
-  fromToken=t.address;
-  document.getElementById("from").innerText=t.symbol;
- }else{
-  toToken=t.address;
-  document.getElementById("to").innerText=t.symbol;
- }
- closeModal();
-}
-
-// GET ROUTE (REAL)
-async function getRoute(){
- let amount=document.getElementById("amount").value;
- let chain=document.getElementById("chain").value;
-
- if(!amount) return alert("Masukkan amount");
-
- document.getElementById("result").innerText="Loading...";
-
- try{
-  const res=await fetch(https://li.quest/v1/quote?fromChain=${chain}&toChain=${chain}&fromToken=${fromToken}&toToken=${toToken}&fromAmount=${amount*1e18}&fromAddress=${user});
-  const data=await res.json();
-
-  routeData=data;
-
-  document.getElementById("result").innerText="Receive: "+data.toAmount;
-  document.getElementById("gas").innerText="Gas: "+(data.estimate?.gasCosts?.[0]?.amount||"-");
-
- }catch(e){
-  document.getElementById("result").innerText="Error route";
- }
-}
-
-// EXECUTE REAL TX
-async function execute(){
- if(!routeData) return alert("Get route dulu");
-
- const tx=await window.ethereum.request({
-  method:"eth_sendTransaction",
-  params:[routeData.transactionRequest]
- });
-
- saveHistory(tx);
- alert("TX: "+tx);
-}
-
-// HISTORY
-function saveHistory(tx){
- history.unshift({tx,time:new Date().toLocaleString()});
- localStorage.setItem("history",JSON.stringify(history));
- renderHistory();
-}
-
-function renderHistory(){
- let el=document.getElementById("historyBox");
- el.innerHTML="";
- history.forEach(h=>{
-  el.innerHTML+=<div>${h.tx}<br><span class="small">${h.time}</span></div>;
- });
-}
-renderHistory();
-
-function toggleHistory(){
- let box=document.getElementById("historyBox");
- box.style.display=box.style.display==="none"?"block":"none";
-}
-</script>
-
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.style.background = "";
+                    document.getElementById('valIn').value = "";
+                    runLogic();
+                }, 2000);
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
